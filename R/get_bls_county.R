@@ -106,12 +106,13 @@ get_bls_county <- function(){
     
     # Correct column data types.
     # remove PR (no data)
-   df = countyemp %>% 
-       dplyr::filter(fips_state != 72) %>% 
-       dplyr::mutate(unemployed=as.numeric(gsub(",", "", as.character(unemployed))), 
-                             employed=as.numeric(gsub(",", "", as.character(employed))),
-                             labor_force=as.numeric(gsub(",", "", as.character(labor_force)))) %>% 
-       tibble::as_tibble()
+    df = countyemp %>% 
+        dplyr::filter(fips_state != 72) %>% 
+        dplyr::mutate(unemployed_rate = as.numeric(unemployed_rate),
+                      unemployed=as.numeric(gsub(",", "", as.character(unemployed))), 
+                      employed=as.numeric(gsub(",", "", as.character(employed))),
+                      labor_force=as.numeric(gsub(",", "", as.character(labor_force)))) %>% 
+        tibble::as_tibble()
     return(df)
-   
+    
 }
