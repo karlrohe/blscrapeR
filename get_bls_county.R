@@ -1,37 +1,4 @@
-#' @title A function that returns county-level labor statistics
-#' @description A function to download and format state employment data.
-#' Due to limitations in the data source, the function can only return data from the last 12 months.
-#' NOTE: Unlike many other BLS data sets, these data are never estimated, meaning the most current data may be as much as
-#' 60 days behind the current data. The county data are also never seasonally adjusted.
-#' @param date_mth The month you would like data for. Accepts full month names and four-digit year.
-#' If NULL, it will return the most recent month in the database.
-#' @param stateName is an optional argument if you only want data for certain state(s). The argument is NULL by default and
-#' will return data for all 50 states.
-#' @param ... additional arguments
-#' @importFrom purrr map map_lgl map_int
-#' @importFrom stats na.omit
-#' @importFrom tibble as_tibble
-#' @importFrom dplyr rename mutate
-#' @export get_bls_county
-#' @examples
-#' \dontrun{
-#' # Most recent month in the data set.
-#' get_bls_county()
-#' 
-#' # A specific month
-#' df <- get_bls_county("May 2017")
-#' 
-#' # Multiple months
-#' df <- get_bls_county(c("April 2017","May 2017"))
-#' 
-#' # A specific state
-#' df <- get_bls_county(stateName = "Florida")
-#' 
-#' # Multiple states, multiple months
-#' df<- get_bls_county(date_mth = "April 2017", 
-#'              stateName = c("Florida", "Alabama"))
-#'}
-#'
+# this function originally appeared in the package blscrapeR.  I've edited it to keep "all the data downloaded".
 
 get_bls_county <- function(){
     # Set some dummy variables. This keeps CRAN check happy.
