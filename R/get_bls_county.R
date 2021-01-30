@@ -33,7 +33,7 @@
 #'}
 #'
 
-get_bls_county <- function(date_mth = NULL, stateName = NULL, ...){
+get_bls_county <- function(){
     # Set some dummy variables. This keeps CRAN check happy.
     countyemp=contyemp=fips_state=V1=V2=V3=V4=V5=V6=V7=V8=V9=period=i=unemployed=employed=labor_force=NULL
     state_fips <- blscrapeR::state_fips
@@ -58,56 +58,60 @@ get_bls_county <- function(date_mth = NULL, stateName = NULL, ...){
     
     unlink(temp)
     
-    # Check to see if user selected specific state(s).
-    if (!is.null(stateName)){
-        # Check to see if states exists.
-        state_check <- purrr::map_lgl(stateName, function(x) any(grepl(x, state_fips$state)))
-        if(any(state_check==FALSE)){
-            stop(message("Please make sure you state names are spelled correctly using full state names."))
-        }
-        # If state list is valid. Grab State FIPS codes from internal data set and subset countyemp
-        state_rows <- purrr::map_int(stateName, function(x) grep(x, state_fips$state))
-        state_selection <- state_fips$fips_state[state_rows]
-        
-        statelist <- purrr::map(state_selection, function(s){
-            state_vals <- subset(countyemp, fips_state==s)
-        })
-        
-        countyemp <- do.call(rbind, statelist)
-    }
+    # # Check to see if user selected specific state(s).
+    # if (!is.null(stateName)){
+    #     # Check to see if states exists.
+    #     state_check <- purrr::map_lgl(stateName, function(x) any(grepl(x, state_fips$state)))
+    #     if(any(state_check==FALSE)){
+    #         stop(message("Please make sure you state names are spelled correctly using full state names."))
+    #     }
+    #     # If state list is valid. Grab State FIPS codes from internal data set and subset countyemp
+    #     state_rows <- purrr::map_int(stateName, function(x) grep(x, state_fips$state))
+    #     state_selection <- state_fips$fips_state[state_rows]
+    #     
+    #     statelist <- purrr::map(state_selection, function(s){
+    #         state_vals <- subset(countyemp, fips_state==s)
+    #     })
+    #     
+    #     countyemp <- do.call(rbind, statelist)
+    # }
+    # 
+    # # Check for date or dates.
+    # if (!is.null(date_mth)){
+    #     date_mth <- as.Date(paste("01", date_mth, sep = ""), format = '%d %b %Y')
+    #     # Check to see if users date exists in data set.
+    #     dt_exist <- sapply(date_mth, function(x) any(grepl(x, countyemp$period)))
+    #     if(any(dt_exist==FALSE)){
+    #         message("Are you sure your date(s) is published? Please check the BLS release schedule.")
+    #         if(i>Sys.Date()-54){
+    #             stop(message("County-wide statistics are usually published on the third Friday of each month for the previous month."))
+    #         }
+    #         if(i<Sys.Date()-360){
+    #             stop(message("This data set only goes back one year. Make sure your date(s) is correct."))
+    #         }
+    #     }
+    # }
+    # 
+    # if (is.null(date_mth)){
+    #     date_mth <- max(countyemp$period)
+    #     date_mth <- as.Date(date_mth, format = '%d %b %Y')
+    # }
     
-    # Check for date or dates.
-    if (!is.null(date_mth)){
-        date_mth <- as.Date(paste("01", date_mth, sep = ""), format = '%d %b %Y')
-        # Check to see if users date exists in data set.
-        dt_exist <- sapply(date_mth, function(x) any(grepl(x, countyemp$period)))
-        if(any(dt_exist==FALSE)){
-            message("Are you sure your date(s) is published? Please check the BLS release schedule.")
-            if(i>Sys.Date()-54){
-                stop(message("County-wide statistics are usually published on the third Friday of each month for the previous month."))
-            }
-            if(i<Sys.Date()-360){
-                stop(message("This data set only goes back one year. Make sure your date(s) is correct."))
-            }
-        }
-    }
-    
-    if (is.null(date_mth)){
-        date_mth <- max(countyemp$period)
-        date_mth <- as.Date(date_mth, format = '%d %b %Y')
-    }
-    
-    # Put months to loop in list.
-    datalist <- purrr::map(date_mth, function(i){
-        mth_vals <- subset(countyemp, period==i)
-    })
-    
+    # # Put months to loop in list.
+    # datalist <- purrr::map(date_mth, function(i){
+    #     mth_vals <- subset(countyemp, period==i)
+    # })
+    # 
     # Rebind.
-    df <- do.call(rbind, datalist)
     
     # Correct column data types.
-    df %<>% dplyr::mutate(unemployed=as.numeric(gsub(",", "", as.character(unemployed))), employed=as.numeric(gsub(",", "", as.character(employed))),
-                          labor_force=as.numeric(gsub(",", "", as.character(labor_force)))) %>% tibble::as_tibble()
-    
+    # remove PR (no data)
+   df = countyemp %>% 
+       dplyr::filter(fips_state != 72) %>% 
+       dplyr::mutate(unemployed=as.numeric(gsub(",", "", as.character(unemployed))), 
+                             employed=as.numeric(gsub(",", "", as.character(employed))),
+                             labor_force=as.numeric(gsub(",", "", as.character(labor_force)))) %>% 
+       tibble::as_tibble()
     return(df)
+   
 }
